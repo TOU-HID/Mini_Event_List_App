@@ -1,4 +1,4 @@
-# Lyxa App
+# Mini Event List App
 
 Ticketmaster event discovery app built with React Native.
 
