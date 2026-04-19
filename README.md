@@ -1,97 +1,148 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Lyxa App
 
-# Getting Started
+Ticketmaster event discovery app built with React Native.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## Full Setup Guide
 
-## Step 1: Start Metro
+### 1) Prerequisites
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+Before running this project, install and verify:
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+- Node.js 18+
+- npm 10+
+- React Native development setup (Android Studio + SDK, Xcode, CocoaPods)
+
+Reference: https://reactnative.dev/docs/set-up-your-environment
+
+### 2) Install dependencies
+
+From project root:
 
 ```sh
-# Using npm
-npm start
-
-# OR using Yarn
-yarn start
+npm install
 ```
 
-## Step 2: Build and run your app
-
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
-
-### Android
+For iOS native dependencies:
 
 ```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
-
-```sh
+cd ios
 bundle install
-```
-
-Then, and every time you update your native dependencies, run:
-
-```sh
 bundle exec pod install
+cd ..
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
+### 3) Environment variables
+
+Create local env file:
 
 ```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+cp .env.example .env
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+Set your Ticketmaster API key in .env:
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+```env
+TM_API_KEY=your_ticketmaster_discovery_api_key_here
+```
 
-## Step 3: Modify your app
+Note: Embedded map uses OpenStreetMap tiles through WebView, so no Google Maps key is required.
 
-Now that you have successfully run the app, let's make changes!
+### 4) Run the app
 
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
+Start Metro:
 
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
+```sh
+npm start
+```
 
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
+Run Android (new terminal):
 
-## Congratulations! :tada:
+```sh
+npm run android
+```
 
-You've successfully run and modified your React Native App. :partying_face:
+Run iOS (new terminal):
 
-### Now what?
+```sh
+npm run ios
+```
 
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
+### 5) Type-check
 
-# Troubleshooting
+```sh
+npx tsc --noEmit --strict --skipLibCheck
+```
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+### 6) Common troubleshooting
 
-# Learn More
+- If native modules are not detected on iOS:
 
-To learn more about React Native, take a look at the following resources:
+```sh
+cd ios && bundle exec pod install
+```
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+- If Metro cache causes stale behavior:
+
+```sh
+npm start -- --reset-cache
+```
+
+- If Android build keeps old native state:
+
+```sh
+cd android && ./gradlew clean
+```
+
+## Key Decisions Made During Build
+
+### Stack and Architecture
+
+- React Native 0.79 + TypeScript for mobile app foundation.
+- React Navigation with root stack + bottom tabs.
+- Redux Toolkit + RTK Query for predictable state + API fetching.
+- MMKV for fast local persistence (favorites and theme mode).
+
+### API Layer
+
+- Ticketmaster Discovery API integration via RTK Query.
+- Pagination merged in cache for infinite-scroll style event loading.
+- Central API logger interceptor added for request/response visibility.
+- API key moved to environment-based config (no hardcoded runtime secret in source).
+
+### Feature Decisions
+
+- Favorites implemented as normalized state (items + id lookup) and persisted via MMKV.
+- Theme system implemented with light/dark modes and in-app toggle.
+- Theme choice persists (system/light/dark cycle).
+
+### Map Decision
+
+- Initial Google Maps integration was replaced.
+- Final map implementation uses OpenStreetMap tiles inside WebView (Leaflet), allowing free test usage without Google billing/API key setup.
+- Map remains reusable via dedicated VenueMap component.
+
+### UX Decisions
+
+- Reusable UI components for search, cards, loading, empty, and error states.
+- Event details include location, pricing, external ticket link, and map section.
+- Open in Maps action preserved for platform-native navigation.
+
+## Screenshots
+
+### 1) Landing Screen
+
+Shows the initial app view with search inputs and quick entry point for exploring events.
+
+![Landing Screen](public/images/landing_screen.png)
+
+### 2) Events List Screen
+
+Displays fetched events in card format with key details and bookmark actions.
+
+![List Screen](public/images/list_screen.png)
+
+### 3) Event Details Screen
+
+Shows full event information including venue details, map section, and ticket action.
+
+![Detail Screen](public/images/detail_screen.png)
